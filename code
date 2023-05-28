@@ -1,0 +1,100 @@
+import numpy
+import math
+
+i = math.inf
+
+matrix = numpy.array([[0, 95, i, i, 75, 32, 57, i],  
+                      [i, 0, 6, i, 18, i, i, i],  
+                      [i, i, 0, 7, i, i, 11, i],
+                      [i, i, i, 0, i, i, i, 81],
+                      [i, i, 9, i, 0, i, 24, i],
+                      [i, 25, i, i, i, 0, 20, 16],
+                      [i, i, i, 20, i, i, 0, 94],
+                      [i, i, i, i, i, i, i, 0]])
+
+
+def deykstra(matrix):
+    m = numpy.full((8,8),i)
+
+    start = 1 - 1
+    end = 8
+    minim = 0
+    node = start
+    n = 8
+    ostov = {node}  
+    rez = {node + 1: 0}  
+
+    for iter in range(n - 1):
+
+        stroke = []
+        column = []
+
+        for j in range(n):
+            if j not in ostov:
+                column = m[:, j]
+                stroke.append(min(min(column), matrix[node][j] + minim))
+            else:
+                stroke.append(i)
+
+        m[node] = stroke
+        minim = min(m[node])
+        s = m[node]
+        node = numpy.where(s == minim)[0][0]
+        ostov.add(node)
+        rez[node + 1] = float(minim)
+
+        m[node] = stroke
+
+    return rez
+    
+    
+def find_way(rez):
+    the_end=rez[8]
+    the_way=[8]
+    temp_vershina=8
+    smthg=False
+    while True:
+        for vershina, ves in rez.items():
+            if(the_end==ves+matrix[vershina-1][temp_vershina-1]):
+                if(vershina not in the_way):
+                    the_way.append(vershina)
+                    the_end=ves
+                    temp_vershina=vershina
+                    break
+                else:
+                    smthg=True
+                    break
+         
+        if smthg:
+            break
+    return the_way
+    
+
+def find_min(the_way):
+    minimum=i
+    for temp in range(len(the_way)-1):
+        element=matrix[the_way[temp+1]-1][the_way[temp]-1]
+        if(element<minimum):
+            minimum=element
+    return minimum
+    
+
+def find_matrix(minimum,the_way):
+    for temp in range(len(the_way)-1):
+        matrix[the_way[temp+1]-1][the_way[temp]-1]-=minimum
+        if(matrix[the_way[temp+1]-1][the_way[temp]-1]==0):
+            matrix[the_way[temp+1]-1][the_way[temp]-1]=i
+    return matrix
+
+
+potok=0
+while True:
+    stop=True
+    rez=deykstra(matrix)
+    if 8 not in rez.keys():
+        break
+    way=find_way(rez)
+    minimum=find_min(way)
+    potok+=minimum
+    matrix=find_matrix(minimum, way)
+print(potok)
